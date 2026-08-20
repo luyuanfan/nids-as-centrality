@@ -5,7 +5,7 @@
 
 Complete the tasks below in order. All tasks should be completed in the Jupyter Notebook
 
---- 
+---
 
 ### Task 0: Setup
 There are multiple options for how to run this notebook

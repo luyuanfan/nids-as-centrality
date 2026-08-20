@@ -34,22 +34,36 @@ An unwanted consequence is that applying BC on partial BGP data, collected from 
 
 Therefore, **hegemony** was devised as a variant of BC that takes into account this bias. Instead of trusting every viewpoints, hegemony attempts to drop the viewpoints that are most biased towards the AS *v* in question. More specifically, it drops viewpoints with the highest (or lowest) number of paths passing through *v*. Then, it computes hegemony by averaging the fraction of paths going through *v* for each remaining viewpoint.
 
-In short, the two metrics are very similar conceptually, except that hegemony is an adapatation of BC specifically to decrease collector bias in the context of **observed BGP data**.
+In short, the two metrics are very similar conceptually, except that hegemony is an adapatation of BC specifically to decrease collector bias in the context of **observed BGP data**. 
+
+In task 1 and 2, you will implement parts of the BC and hegemony algorithms and compare their results. 
 
 ## Weighing path based on destination AS address count
 
-In [nids-bgp-control-plane](https://github.com/CAIDA/nids-bgp-control-plane), we have seen since AS can announce prefixes of very different sizes, counting the raw number of ASes in a customer cone is not a fair metric (instead we count the number of addresses). Similarly here, treating each path towards an destination AS as one equal unit hides how much addresses space it routes to.
+Previously, we have seen since AS can announce prefixes of very different sizes, counting the raw number of ASes in a customer cone is not a fair metric (instead we count the number of addresses). Similarly here, treating each path towards an destination AS as one equal unit *hides* how much addresses space it routes to. Therefore, we want to weigh each path by the size the AS's address space that it eventually leads to. 
 
-## Formal definition of BC and hegemony
+## Formal definitions of BC and hegemony
 
-The betweenness centrality of an AS $v$ is defined by: 
+The betweenness centrality of an AS $v$ is defined as: 
 
 $$
-BC(v) = \frac{1}{S} \sum_{u,w \in V}{\sigma_{uw}{(v)}},
-\qquad u \neq w \neq v
+BC(v) = \frac{1}{S} \sum_{u,w \in V}{\sigma_{uw}{(v)}}
 $$
 
-where $S$ is the total number of paths, and $\sigma_{uw}{(v)}$ is the number of paths from $u$ to $w$ passing through $v$.
+where $S$ is the total number of paths, and $\sigma_{uw}{(v)}$ is the number of paths from $u$ to $w$ passing through $v$. 
 
+The hegemony of an AS $v$ is an aggregation of the BC scores of an AS $v$ across a number of viewpoints:
+
+$$
+H(v, \alpha) = \frac{1}{n - (2\lfloor\alpha n\rfloor)} \sum_{j=\lfloor\alpha n\rfloor + 1}^{n - \lfloor\alpha n\rfloor} BC_{(j)}(v)
+$$
+
+where $n$ is the total number of viewpoints, $2\alpha$ is the ratio of discarded biased viewpoints, and $BC_(j)(v)$ is $v$'s BC value computed with paths from only one viewpoint $j$.
 
 ## Observing traffic rerouting on the Internet
+
+So far, we have been seeing AS centrality as a static score at a certain point in time. One of its application is monitoring the *change* of an AS's centrality over a period of time to detect rerouting events. 
+
+Rerouting produces a very specific signature: the AS(es) that lose traffic see their centrality drop, while the AS(es) that absorb the rerouted traffic see theirs rise.
+
+For task 3, you will apply hegemony on real world BGP routing data and interpret the changes in centrality score. 
