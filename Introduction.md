@@ -55,10 +55,10 @@ where $S$ is the total number of paths, and $\sigma_{uw}{(v)}$ is the number of 
 The hegemony of an AS $v$ is an aggregation of the BC scores of an AS $v$ across a number of viewpoints:
 
 $$
-H(v, \alpha) = \frac{1}{n - (2\lfloor\alpha n\rfloor)} \sum_{j=\lfloor\alpha n\rfloor + 1}^{n - \lfloor\alpha n\rfloor} BC_{(j)}(v)
+H(v, \alpha) = \frac{1}{n - 2\lfloor\alpha n\rfloor} \sum_{j=\lfloor\alpha n\rfloor + 1}^{n - \lfloor\alpha n\rfloor} BC_{(j)}(v)
 $$
 
-where $n$ is the total number of viewpoints, $2\alpha$ is the ratio of discarded biased viewpoints, and $BC_(j)(v)$ is $v$'s BC value computed with paths from only one viewpoint $j$.
+where $n$ is the total number of viewpoints, $2\alpha$ is the ratio of discarded biased viewpoints, and $BC_{(j)}(v)$ is $v$'s BC value computed with paths from only one viewpoint $j$.
 
 ## Observing traffic rerouting on the Internet
 
