@@ -1,11 +1,11 @@
-[README](README.md) | [Introduction](introduction.md) | Tasks | [Task-1](task-1.md) | [Task-2](task-2.md) | [Notebook](as-betweenness-centrality.ipynb)
+[README](README.md) | [Introduction](Introduction.md) | Tasks | [Task-1](Task-1.md) | [Task-2](Task-2.md) | [Notebook](as-betweenness-centrality.ipynb)
 
 
 # Tasks
 
 Complete the tasks below in order. All tasks should be completed in the Jupyter Notebook
 
---- 
+---
 
 ### Task 0: Setup
 - Access NRP's JupyterHub: https://jupyterhub-west.nrp-nautilus.io
@@ -26,7 +26,7 @@ Q3: What does the shape of this CCDF tell you?
 ### Task 2: Hegemony
 - Complete the coding portions
 - Answer all questions
-- Compare and contrast betweeen Centrality and Hegemony
+- Compare and contrast betweenness centrality and Hegemony
 
 Q: Why are we removing the top and bottom $\alpha$ proportions of the Vantage Points?
 
