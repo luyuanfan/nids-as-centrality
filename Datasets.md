@@ -19,7 +19,7 @@ Each entry represents one prefix announcement and contains:
 |                 |              | When a prefix is announced by more than one origin AS, it is called a MOAS prefix |
 | **prefix**      | 43.0.0.0/24 | The announced IP prefix in CIDR notation                                          |
 
-<img width="60%" src="images/rib-route.png"><br/>
+![AS path example](images/rib-route.png)
 
 ### bgpkit
 
