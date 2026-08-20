@@ -1,4 +1,4 @@
-[README](README.md) | [Introduction](introduction.md) | [Tasks](tasks.md) | Task-1 | [Task-2](task-2.md) | [Notebook](as-betweenness-centrality.ipynb)
+[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | Task-1 ⮕ | [Task-2](Task-2.md) | [Task-3](Task-3.md) | [Notebook](as-betweenness-centrality.ipynb)
 
 # Guide: Task 1
 
