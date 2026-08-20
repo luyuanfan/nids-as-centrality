@@ -4,6 +4,12 @@
 
 Like [the BGP Control Plane assignment](https://github.com/CAIDA/nids-bgp-control-plane/), we employ BGP Routing Information Base (RIB) snapshots. This time, we source the data from RIPE's publicly available [Routing Information Service](https://www.ripe.net). To get a multifaceted view of the Internet, we use collectors in Amsterdam (RRC00), São Paolo (RRC15), and Singapore (RRC23).
 
+TODO: RIPE RIS collectors dump their full RIB every 8 hours (00:00, 08:00, 16:00 UTC)
+as MRT `bview` files at
+`https://data.ris.ripe.net/<collector>/<YYYY.MM>/bview.<YYYYMMDD>.<HHMM>.gz`.
+
+TODO: Explain the choice of geographically distributed collectors
+
 ### MRT Format
 
 RIB files are stored in **MRT (Multi-Threaded Routing Toolkit)** format.
