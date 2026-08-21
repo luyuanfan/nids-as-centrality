@@ -1,35 +1,9 @@
-[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datatsets.md) | [Tasks](Tasks.md) | [Task-1](Task-1.md) | [Task-2 ⮕ | [Task-3](Task-3.md) | [Notebook](as-betweenness-centrality.ipynb)
+[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datatsets.md) | [Tasks](Tasks.md) | [Task-1](Task-1.md) | [Task-2 ⮕ | [Notebook](as-betweenness-centrality.ipynb)
 
 
 # Task 2 Guidance: AS Hegemony
 
 This page provides explanation for Task 2
-
-## Filtering BGP route collector peers
-
-We are filterting BGP collector peers down to "full-feed" viewpoints. Using the per-peer announcement from an earlier pass. In this case we are using only peers that announce at least 75% of IPv4 prefixes. This could allow for overcounting, but this will be corrected in a future cell.
-
-```python
-ALPHA = 0.1                # fraction of viewpoints trimmed at each end (paper's value)
-FULL_FEED_FRACTION = 0.75  # a viewpoint must carry >= this fraction of all announced IPv4 prefixes
-
-vp_threshold = FULL_FEED_FRACTION * len(norm_weight)
-
-# peer_counts (from pass 1) sums announcements across collectors, so a peer
-# feeding two collectors is counted about twice here. That only overshoots,
-# never undershoots: no genuine full feed is lost at this stage, and impostors
-# are re-checked against their deduplicated route count after pass 3.
-vp_meta = sorted(k for k, c in peer_counts.items() if c >= vp_threshold)
-vp_index = {peer_ip: j for j, (peer_ip, _) in enumerate(vp_meta)}
-m = len(vp_meta)
-
-print(f"{m} candidate full-feed viewpoints "
-      f"(>= {vp_threshold:,.0f} of {len(norm_weight):,} IPv4 prefixes) "
-      f"in {len({asn for _, asn in vp_meta})} peer ASes, "
-      f"out of {len(peer_counts)} peers total")
-```
-
----
 
 ## Pass over RIB dumps
 
