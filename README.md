@@ -1,4 +1,4 @@
-README ⮕ | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Task.md) | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Task 3](Task-3.md) | [Notebook](nids-as-centrality-metric.ipynb)
+README ⮕ | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Notebook](nids-as-centrality.ipynb)
 
 
 # etp-as-centrality-metric
@@ -7,7 +7,7 @@ This repository contains an implementation of the betweenness centrality metric 
 
 ## Notebook
 
-[`as-betweenness-centrality.ipynb`](as-betweenness-centrality.ipynb) downloads
+[`nids-as-centrality.ipynb`](nids-as-centrality.ipynb) downloads
 one or more RIPE RIS `bview` RIB snapshots (MRT format), parses them with
 [`pybgpkit`](https://github.com/bgpkit/bgpkit-parser), merges them into a single
 route set deduplicated by *(prefix, AS path)*, and computes the
@@ -33,3 +33,5 @@ one route set, dropping routes already seen. The default is `["rrc00"]`
 (Amsterdam multihop, largest peer set, ~414 MB download); use
 `COLLECTORS = ["rrc06"]` for a quick test run that finishes in a few minutes.
 Snapshots are cached under `data/`.
+
+README ⮕ | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Notebook](nids-as-centrality.ipynb)

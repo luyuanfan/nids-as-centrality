@@ -1,16 +1,10 @@
-[README](README.md) | [Introduction](Introduction.md) | Datasets ⮕ | [Tasks](Tasks.md) | [Task-1](Task-1.md) | [Task-2](Task-2.md) | [Task-3](Task-3.md) [Notebook](as-betweenness-centrality.ipynb)
+[README](README.md) | [Introduction](Introduction.md) | Datasets ⮕ | [Tasks](Tasks.md) | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Notebook](nids-as-centrality.ipynb)
 
 # Datasets
 
 ## BGP Routing Table (RIB) Snapshots
 
-Like [the BGP Control Plane assignment](https://github.com/CAIDA/nids-bgp-control-plane/), we employ BGP Routing Information Base (RIB) snapshots. This time, we source the data from RIPE's publicly available [Routing Information Service](https://www.ripe.net). To get a multifaceted view of the Internet, we use collectors in Amsterdam (RRC00), São Paolo (RRC15), and Singapore (RRC23).
-
-TODO: RIPE RIS collectors dump their full RIB every 8 hours (00:00, 08:00, 16:00 UTC)
-as MRT `bview` files at
-`https://data.ris.ripe.net/<collector>/<YYYY.MM>/bview.<YYYYMMDD>.<HHMM>.gz`.
-
-TODO: Explain the choice of geographically distributed collectors
+Like [the BGP Control Plane assignment](https://github.com/CAIDA/nids-bgp-control-plane/), we employ BGP Routing Information Base (RIB) snapshots. This time, we source the data from RIPE's publicly available [Routing Information Service](https://www.ripe.net). We use collectors in Amsterdam (RRC00), São Paolo (RRC15), and Singapore (RRC23). These collectors are geographically diverse and are located at large Internet eXchange Points (IXPs), so they provide a sufficiently (for our purposes) global perspective of the Internet. We select only three collectors to reduce the notebook's required computational resources.
 
 ### MRT Format
 
@@ -40,6 +34,11 @@ for elem in bgpkit.Parser(url=url):
     (etc)
 ```
 
+## RIPE AS Names
+RIPE maintains a [mapping of ASNs](https://ftp.ripe.net/ripe/asnames/) to their corresponding ASes and organizations.
+
 ## CAIDA AS Rank
 
 CAIDA's [AS Rank](https://asrank.caida.org/) project sorts ASes by their customer cone size. The table is generated using the same data from [the BGP Control Plane assignment](https://github.com/CAIDA/nids-bgp-control-plane/).
+
+[README](README.md) | [Introduction](Introduction.md) | Datasets ⮕ | [Tasks](Tasks.md) | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Notebook](nids-as-centrality.ipynb)

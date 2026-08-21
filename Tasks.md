@@ -1,4 +1,4 @@
-[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | Tasks ⮕ | [Task-1](Task-1.md) | [Task-2](Task-2.md) | [Task-3](Task-3.md) | [Notebook](as-betweenness-centrality.ipynb)
+[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | Tasks ⮕ | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Notebook](nids-as-centrality.ipynb)
 
 
 # Tasks
@@ -26,26 +26,31 @@ There are multiple options for how to run this notebook
 Detailed Guidance &rarr; [Task-1 Guide](Task-1.md)
 
 - Complete the YOUR CODE HERE segments
-  - two segments
 - Answer all questions in the notebook
 
-Q1: Why are we using a weighting scheme to calculate BC, conceptually?
+Q1: What does betweenness centrality measure?
 
-Q2: Why are there differences between the AS rankings for weighted and unweighted?
+Q2: Why would we use the weighted betweenness centrality versus the unweighted betweenness centrality?
 
-Q3: What does the shape of this CCDF tell you?
+Q3: What are the top 5 ASes ranked by their weighted betweenness centralities? How these compare to the top ASes [as ranked by customer cone size](https://asrank.caida.org/)? Does this make sense? Why?
+
+Q4: What shape does the CCDF have? What does this tell us about the distribution of weighted betweenness centralities?
 
 ### Task 2: Hegemony
 
 Detailed Guidance &rarr; [Task-2 Guide](Task-2.md)
 
-- Answer all questions:
+- Complete the YOUR CODE HERE segments
+- Answer all questions in the notebook
 
-Q1: Why are we removing the top and bottom $\alpha$ proportions of the Vantage Points?
+Q1: Why do we remove the top and bottom $\alpha$ proportions of the viewpoints?
 
-Q2: What are the main changes between BC rankings and Hegemony ranking?
+Q2: How do the top 5 ASes ranked by betweenness centrality compare to the top 5 ranked by AS hegemony?
 
-Q3: What does this plot tell us about the differences in values?
+Q3: What does the concentration of points on the $x = y$ line tell us about the relationship between betweenness centrality and AS hegemony?
 
-### Task 3: Large Disruption Event
+Q4: Look up the AS that corresponds to the outlier point. How does this AS's geographic location relate to the location of the collectors?
 
+Q5: Why does the geographic location of the outlier AS cause its betweenness centrality to be so much larger than its AS hegemony?
+
+[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | Tasks ⮕ | [Task 1](Task-1.md) | [Task 2](Task-2.md) | [Notebook](nids-as-centrality.ipynb)
