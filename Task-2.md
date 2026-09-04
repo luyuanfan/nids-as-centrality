@@ -1,158 +1,109 @@
-[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | [Task 1](Task-1.md) | [Task 2 ⮕ | [Notebook](nids-as-centrality.ipynb)
+[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | [Task 1](Task-1.md) | Task 2 ⮕ | [Task 3](Task-3.md) | [Notebook](nids-as-centrality-refactored.ipynb)
 
 
-# Task 2 Guidance: AS Hegemony
+# Task 2: Betweenness Centrality
 
-This page provides explanation for Task 2
+The BC of an AS $v$ is defined as:
 
-## Pass over RIB dumps
+$$
+BC(v) = \frac{1}{S} \sum_{u,w \in V}{\sigma_{uw}{(v)}}, \quad u \ne v \ne w
+$$
 
-Here we are tallying per-viewpoint and per-AS statistics needed to compute the AS Hegemony. Each route is deduplicated, unusable entries are skipped, and route counts and address-weighted route counts are accumulated per viewpoint (`vp_total_u` and `vp_total_w`).
+where $S$ is the total number of paths, and $\sigma_{uw}{(v)}$ is the number of paths from $u$ to $w$ passing through $v$.
 
-```py
-n_used = 0
+## Accumulating the Transit Counts
 
-routes_per_vp = {}     # map from ASes and VPs to count of routes
-addresses_per_vp = {}  # map from ASes and VPs to weighted count of routes
-# The following three lines behave like DefaultDicts. They are more
-# memory efficient for this particular task
-zero_row = array("q", [0]) * num_vps  # initialize everything to 0s
-vp_total_u = array("q", zero_row)     # map from VPs to count of routes
-vp_total_w = array("q", zero_row)     # map from VPs to weighted count of routes
+To compute $BC(v)$, we must collect:
 
-# Table to ensure each route is considered only once
-seen = SeenKeys(sum(c for (ip, _), c in peer_counts.items() if ip in vp_index))
+* $S$, the total number of paths in our dataset
+* $\sum_{u,w \in V}{\sigma_{uw}{(v)}}$, the number of paths that pass through $v$.
 
-for elem in iter_routes(RIB_PATHS, dedup=False, progress_every=0):
-    j = vp_index.get(elem.peer_ip)
+A standard strategy for this type of problem is accumulation. The idea is to iterate over the entire dataset and count how much each path contributes to $S$ and $\sum_{u, w \in V} \sigma_{uw}(v)$.
 
-    # Filter out VPs that see few routes
-    if j is None:
-        continue
-    # Filter out duplicate routes
-    if not seen.add(hash((elem.peer_ip, elem.prefix))):
-        continue
+### Unweighted BC
 
-    w = weights.get(elem.prefix)
+In the unweighted case, each path contributes:
 
-    # Filter out IPv6, default route, or unparseable prefix
-    if w is None:
-        continue
-    path_str = elem.as_path
-    # Filter out AS-set or missing path
-    if path_str is None or "{" in path_str:
-        continue
+* $1$ to the total number of paths;
+* $1$ to the number of paths passing through $v$, where $v$ ranges over the intermediate ASes.
 
-    n_used += 1
-    if n_used % 5_000_000 == 0:
-        print(f"  {n_used:,} viewpoint routes...")
+For example, suppose the observed path is:
 
-    # Accumulate weight towards the denominator of BC_j(v)
-    vp_total_u[j] += 1
-    vp_total_w[j] += w
+*A → B → C → D*
 
-    path = []
-    prev = None
-    for hop in path_str.split():
-        if hop != prev:  # collapse prepending
-            path.append(hop)
-            prev = hop
+This path contributes $1$ to the total path count and $1$ to the path count for each of *A*, *B*, *C*, and *D*.
 
-    for v in path[1:-1]:
-        routes_acc = routes_per_vp.get(v)
-        addresses_acc = addresses_per_vp.get(v)
-        if addresses_acc is None:
-            # In this case, routes_acc is also None
-            routes_acc = routes_per_vp[v] = array("q", zero_row)
-            addresses_acc = addresses_per_vp[v] = array("q", zero_row)
+### Weighted BC
 
-        # Accumulate weight towards the numerator of BC_j(v)
-        routes_acc[j] += 1
-        addresses_acc[j] += w
+For weighted BC, paths are weighted according to the amount of address space associated with their origin prefixes.
+
+For each unique path, we calculate its total weight by summing the weights of all prefixes announced by its origin:
+
+```python
+weight = sum(pfx_to_weight[o_pfx] for o_pfx in o_pfxs)
 ```
 
----
+Thus, a path associated with a larger amount of address space contributes more to the weighted BC than a path associated with a smaller amount of address space.
 
-## AS Hegemony
+## Computing the BC Scores
 
-Here we compute the hegemony score for each AS.
+Once the counts have been accumulated, we can compute BC by dividing each AS's path count by the corresponding total.
 
-To do this, we start by considering a particular AS $v$. For each viewpoint $j$, we compute the betweenness centrality $BC_{(j)}(v)$ as in Task 1, only considering paths seen by $j$.
+For an AS (v):
 
-We discard the top and bottom $\alpha$ proportion of viewpoints to exclude outliers. We then average the per-VP betweenness centralities.
+$$
+\frac{\text{number of observed paths containing }v}
+{\text{total number of observed paths}}
+$$
 
-Then we create a `DataFrame` to create a human readable output for the top 25 ASes.
+and:
+$$
+\frac{\text{total weight of paths containing }v}
+{\text{total weight of all observed paths}}
+$$
 
-```py
-vp_total_w = [vp_total_w[j] for j in valid_vp_indices]
-
-# Find the number (alpha proprtion) of VPs to trim
-n_vps_to_trim = math.floor(ALPHA * n_vp)
-
-hege_rows = []
-for asn_str, vp_w in addresses_per_vp.items():
-    asn = int(asn_str)
-
-    # For each viewpoint, compute the betweenness centrality of this asn
-    vp_bc_w = sorted(vp_w[j] / vp_total_w[j] for j in valid_vp_indices)
-    # Trim the top and bottom alpha proportion VPs and average
-    hegemony = sum(vp_bc_w[n_vps_to_trim:n_vp - n_vps_to_trim]) / (n_vp - 2 * n_vps_to_trim)
-
-    name, country = asn_info.get(asn, ("", ""))
-    hege_rows.append({
-        "asn": asn,
-        "name": name[:48],
-        "country": country,
-        "hegemony": hegemony,
-        "viewpoints": sum(1 for x in vp_bc_w if x > 0),
-    })
-
-hege_df = (pd.DataFrame(hege_rows)
-             .sort_values("hegemony", ascending=False)
-             .reset_index(drop=True))
-hege_df.insert(0, "rank_w", hege_df.index + 1)
-```
-
----
-
-## Plotting
-
-Here we make a log-log plot comparing the two centrality metrics per AS. The diagonal line across the middle would be perfectly followed if the two metrics agreed perfectly.
-
-We additionally annotate the most extreme deviation between betweenness centrality and AS hegemony.
+we have:
 
 ```py
-both = df.merge(hege_df, on="asn", suffixes=("_bc", "_hege"))
-pos = both[(both["bc_weighted"] > 0) & (both["hegemony"] > 0)]
+bc_scores = defaultdict(lambda: {"uw": 0.0, "w": 0.0})
 
-fig, ax = plt.subplots(figsize=(6.5, 6))
-fig.patch.set_facecolor(SURFACE)
-style_axes(ax)
-
-lo = max(min(pos["bc_weighted"].min(), pos["hegemony"].min()), 1e-9)
-hi = max(pos["bc_weighted"].max(), pos["hegemony"].max()) * 2
-ax.plot([lo, hi], [lo, hi], color=MUTED, linewidth=1, linestyle="--", zorder=1)
-ax.annotate("equal under both metrics", xy=(hi, hi),
-            xytext=(-8, -14), textcoords="offset points",
-            ha="right", fontsize=8, color=MUTED)
-
-ax.scatter(pos["bc_weighted"], pos["hegemony"],
-           s=14, color=BLUE, alpha=0.45, linewidths=0, zorder=2)
-
-asn_outlier = pos.iloc[(pos["bc_weighted"] / pos["hegemony"]).argmax()]
-ax.annotate(f"AS{asn_outlier['asn']}", xy=(asn_outlier["bc_weighted"], asn_outlier["hegemony"]),
-            xytext=(5, 3), textcoords="offset points",
-            fontsize=8, color=INK2)
-
-ax.set_xscale("log")
-ax.set_yscale("log")
-ax.set_xlim(lo, hi)
-ax.set_ylim(lo, hi)
-ax.set_xlabel("Weighted betweenness centrality", color=INK2)
-ax.set_ylabel("AS hegemony", color=INK2)
-ax.set_title(f"AS hegemony vs. Weighted BC ({LABEL}, {SNAPSHOT_DATE})", color=INK)
-fig.tight_layout()
-plt.show()
+for asn in all_asn:
+    bc_scores[asn] = {
+        "uw": path_with_asn_uw[asn] / total_observed_path_uw,
+        "w": path_with_asn_w[asn] / total_observed_path_w,
+    }
 ```
 
-[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | [Task 1](Task-1.md) | [Task 2 ⮕ | [Notebook](nids-as-centrality.ipynb)
+## Plotting BC scores
+
+Like in the BGP assignment, we can create a CCDF of the betweenness centralities.
+
+```py
+"""
+CCDF for unweighted betweenness centrality.
+For each BC value x, count how many ASes have BC >= x,
+"""
+bc_uw_list = [v for v in bc_df_enriched["uw"] if v > 0]
+bc_uw_dist = Counter(bc_uw_list)
+x_bc_uw = sorted(bc_uw_dist.keys())
+y_bc_uw = []
+remaining = len(bc_uw_list) 
+for xi in x_bc_uw:
+    y_bc_uw.append(remaining)
+    remaining -= bc_uw_dist[xi]
+
+"""
+CCDF for weighted betweenness centrality.
+Same computation, but for weighted betweenness centrality.
+"""
+bc_w_list = [v for v in bc_df_enriched["w"] if v > 0]
+bc_w_dist = Counter(bc_w_list)
+x_bc_w = sorted(bc_w_dist.keys())
+y_bc_w = []
+remaining = len(bc_w_list)
+for xi in x_bc_w:
+    y_bc_w.append(remaining)
+    remaining -= bc_w_dist[xi]
+```
+
+[README](README.md) | [Introduction](Introduction.md) | [Datasets](Datasets.md) | [Tasks](Tasks.md) | [Task 1](Task-1.md) | Task 2 ⮕ | [Task 3](Task-3.md) | [Notebook](nids-as-centrality-refactored.ipynb)
